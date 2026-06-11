@@ -33,7 +33,7 @@ export default function MetricsTable({ title, subtitle, rows }) {
               <tr>
                 <th>File name</th>
                 <th>WER %</th>
-                <th>CER %</th>
+                <th>SemWER %</th>
                 <th>BLEU-4 %</th>
                 <th>S</th>
                 <th>D</th>

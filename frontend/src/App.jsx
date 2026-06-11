@@ -124,7 +124,7 @@ function App() {
           <h1>Score ASR outputs with a clean, traceable review workflow.</h1>
           <p className="hero-text">
             Upload one verified transcript and any number of transcription hypotheses.
-            The backend computes WER, CER, and BLEU-4, then stores each run in PostgreSQL.
+            The backend computes WER, SemWER, and BLEU-4, then stores each run in PostgreSQL.
           </p>
           <div className="hero-stats">
             <div>

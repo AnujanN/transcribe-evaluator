@@ -1,6 +1,6 @@
 # Transcript-Evaluator
 
-Transcript-Evaluator is a Dockerized web application for comparing one human-verified ground truth transcript against multiple ASR/transcriber outputs. It scores each hypothesis with WER, CER, and BLEU-4, stores every evaluation session in PostgreSQL, and renders the results in a React dashboard.
+Transcript-Evaluator is a Dockerized web application for comparing one human-verified ground truth transcript against multiple ASR/transcriber outputs. It scores each hypothesis with WER, SemWER, and BLEU-4, stores every evaluation session in PostgreSQL, and renders the results in a React dashboard.
 
 ## Architecture
 
@@ -47,7 +47,7 @@ The browser talks to the backend through the `/api` proxy, so you do not need to
 ## Features
 
 - **Word Error Rate (WER)**: Measures percentage of words that differ between hypothesis and reference
-- **Character Error Rate (CER)**: Measures percentage of characters that differ
+- **Semantic Word Error Rate (SemWER)**: Measures word-level differences after semantic normalization
 - **BLEU-4 Score**: Cumulative 4-gram precision metric from machine translation, adapted for ASR
 - **Error Breakdown**: Provides detailed counts of substitutions, deletions, and insertions
 - **Batch Processing**: Evaluate multiple ASR systems against a single ground truth in one run
@@ -108,7 +108,7 @@ Ensure all text files you upload are UTF-8 encoded. Most modern text editors def
 
 ## Dependencies
 
-- **jiwer** (≥3.0.0): WER/CER calculation
+- **jiwer** (≥3.0.0): WER/SemWER alignment calculation
 - **nltk** (≥3.8.0): BLEU score calculation and tokenization
 - **pandas** (≥2.0.0): Data manipulation for exports
 - **tabulate** (≥0.9.0): ASCII table formatting

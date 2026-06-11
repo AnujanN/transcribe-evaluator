@@ -54,7 +54,7 @@ export default function HistoryDashboard({ sessions, selectedSessionId, onSelect
               <div className="history-metrics">
                 <span>Files: {session.hypotheses_count}</span>
                 <span>WER {formatMetric(session.average_wer)}%</span>
-                <span>CER {formatMetric(session.average_cer)}%</span>
+                <span>SemWER {formatMetric(session.average_cer)}%</span>
                 <span>BLEU {formatMetric(session.average_bleu)}%</span>
               </div>
             </button>

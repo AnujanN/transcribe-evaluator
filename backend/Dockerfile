@@ -23,10 +23,9 @@ import nltk
 target_dir = "/usr/local/share/nltk_data"
 os.makedirs(target_dir, exist_ok=True)
 
-for resource in ("punkt_tab", "punkt"):
+for resource, resource_path in (("punkt_tab", "tokenizers/punkt_tab"), ("punkt", "tokenizers/punkt"), ("wordnet", "corpora/wordnet")):
     try:
-        nltk.data.find(f"tokenizers/{resource}")
-        break
+        nltk.data.find(resource_path)
     except LookupError:
         try:
             nltk.download(resource, download_dir=target_dir, quiet=True)

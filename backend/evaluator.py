@@ -6,25 +6,59 @@ from functools import lru_cache
 from typing import Dict, List
 
 import nltk
-from jiwer import process_characters, process_words
+from jiwer import process_words
+from nltk.corpus import wordnet as wn
+from nltk.stem import WordNetLemmatizer
 from nltk.translate.bleu_score import sentence_bleu
+
+
+LEMMATIZER = WordNetLemmatizer()
 
 
 @lru_cache(maxsize=1)
 def ensure_nltk_dependencies() -> None:
     """Download or verify the tokenizer resources expected by NLTK."""
 
-    for resource_name in ("tokenizers/punkt_tab", "tokenizers/punkt"):
-        try:
-            nltk.data.find(resource_name)
-            return
-        except LookupError:
-            continue
+    resources = (
+        ("tokenizers/punkt_tab", "punkt_tab"),
+        ("tokenizers/punkt", "punkt"),
+        ("corpora/wordnet", "wordnet"),
+    )
 
-    try:
-        nltk.download("punkt_tab", quiet=True)
-    except Exception:
-        nltk.download("punkt", quiet=True)
+    for resource_path, download_name in resources:
+        try:
+            nltk.data.find(resource_path)
+        except LookupError:
+            try:
+                nltk.download(download_name, quiet=True)
+            except Exception:
+                pass
+
+
+def _semantic_token(token: str) -> str:
+    """Return a stable semantic representative for a token."""
+
+    candidates = {
+        LEMMATIZER.lemmatize(token),
+        LEMMATIZER.lemmatize(token, pos="v"),
+        LEMMATIZER.lemmatize(token, pos="a"),
+        LEMMATIZER.lemmatize(token, pos="r"),
+    }
+
+    for synset in wn.synsets(token):
+        for lemma_name in synset.lemma_names():
+            candidates.add(lemma_name.lower())
+
+    return sorted(candidates, key=lambda value: (len(value), value))[0]
+
+
+def _semantic_normalize_text(text: str) -> str:
+    """Normalize text into semantic token representatives."""
+
+    if not text:
+        return ""
+
+    return " ".join(_semantic_token(token) for token in text.split())
 
 
 def _alignment_count(result: object, attribute: str) -> int:
@@ -43,11 +77,13 @@ def compute_wer(reference_text: str, hypothesis_text: str) -> float:
         return 100.0
 
 
-def compute_cer(reference_text: str, hypothesis_text: str) -> float:
-    """Return CER as a percentage."""
+def compute_semwer(reference_text: str, hypothesis_text: str) -> float:
+    """Return semantic word error rate as a percentage."""
 
     try:
-        return float(process_characters(reference_text, hypothesis_text).cer * 100)
+        semantic_reference = _semantic_normalize_text(reference_text)
+        semantic_hypothesis = _semantic_normalize_text(hypothesis_text)
+        return float(process_words(semantic_reference, semantic_hypothesis).wer * 100)
     except Exception:
         return 100.0
 
@@ -94,13 +130,13 @@ def evaluate_transcript(
     """Compute all evaluation metrics for one transcript pair."""
 
     wer_score = compute_wer(reference_text, hypothesis_text)
-    cer_score = compute_cer(reference_text, hypothesis_text)
+    semwer_score = compute_semwer(reference_text, hypothesis_text)
     bleu_score = compute_bleu_score(reference_tokens, hypothesis_tokens)
     alignment = compute_alignment(reference_text, hypothesis_text)
 
     return {
         "wer": wer_score,
-        "cer": cer_score,
+        "cer": semwer_score,
         "bleu": bleu_score,
         "substitutions": alignment["substitutions"],
         "deletions": alignment["deletions"],
