@@ -1,0 +1,8 @@
+.venv/
+backend/.venv/
+backend/transcript_evaluator_backend.egg-info/
+__pycache__/
+*.pyc
+node_modules/
+dist/
+postgres_data/
